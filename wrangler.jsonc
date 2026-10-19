@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "notes-and-papers",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+
+  // Lets the worker call itself (used by the adapter for ISR revalidation).
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "notes-and-papers" }],
+
+  // Page cache. Create these once, then paste the KV id below:
+  //   npx wrangler r2 bucket create notes-and-papers-cache
+  //   npx wrangler kv namespace create NEXT_TAG_CACHE_KV
+  "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "notes-and-papers-cache" }],
+  "kv_namespaces": [{ "binding": "NEXT_TAG_CACHE_KV", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }],
+
+  // next/image optimisation.
+  "images": { "binding": "IMAGES" },
+
+  "observability": { "enabled": true }
+
+  // Secrets (never put these here): npx wrangler secret put REVALIDATE_SECRET / INDEXNOW_KEY
+  // Public settings (NEXT_PUBLIC_*) are baked in at build time: see .env.production.example
+}

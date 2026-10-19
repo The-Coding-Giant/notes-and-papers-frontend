@@ -1,0 +1,231 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design tokens. Neo-brutalist "vault" look: warm paper background, black ink, thick black borders,
+ * hard offset shadows, yellow as the main action colour, orange for highlights.
+ * HSL triplets so they can be used with alpha.
+ */
+:root {
+  --background: 60 33% 96%; /* #F9F9F3 */
+  --foreground: 0 0% 7%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 7%;
+  --primary: 48 96% 53%; /* #FACC15 */
+  --primary-foreground: 0 0% 7%;
+  --link: 43 100% 24%; /* readable dark gold for text links on paper */
+  --secondary: 60 14% 92%;
+  --secondary-foreground: 0 0% 7%;
+  --muted: 60 14% 92%;
+  --muted-foreground: 45 8% 32%;
+  --accent: 14 100% 57%; /* #FF5722 */
+  --accent-foreground: 0 0% 7%;
+  --destructive: 0 75% 42%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 152 65% 26%;
+  --border: 0 0% 7%;
+  --input: 0 0% 7%;
+  --ring: 14 100% 50%;
+  --radius: 0.125rem;
+}
+
+.dark {
+  --background: 0 0% 7%;
+  --foreground: 60 33% 96%;
+  --card: 0 0% 11%;
+  --card-foreground: 60 33% 96%;
+  --primary: 48 96% 53%;
+  --primary-foreground: 0 0% 7%;
+  --link: 48 96% 60%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 60 33% 96%;
+  --muted: 0 0% 14%;
+  --muted-foreground: 50 10% 70%;
+  --accent: 14 100% 60%;
+  --accent-foreground: 0 0% 7%;
+  --destructive: 0 80% 62%;
+  --destructive-foreground: 0 0% 7%;
+  --success: 152 55% 55%;
+  --border: 60 20% 88%;
+  --input: 60 20% 88%;
+  --ring: 48 96% 60%;
+}
+
+@theme inline {
+  --breakpoint-xs: 375px;
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-link: hsl(var(--link));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius-lg: var(--radius);
+  --radius-md: var(--radius);
+  --radius-sm: var(--radius);
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), Impact, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+  --shadow-hard: 4px 4px 0 0 hsl(var(--border));
+  --shadow-hard-sm: 2px 2px 0 0 hsl(var(--border));
+  --shadow-hard-lg: 6px 6px 0 0 hsl(var(--border));
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+    /* Custom scrollbars (Firefox). WebKit/Blink rules are below. */
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary)) hsl(var(--muted));
+  }
+  /* Custom scrollbars (Chrome, Edge, Safari): square yellow thumb with a black outline on a paper track. */
+  ::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-left: 2px solid hsl(var(--border));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border: 2px solid hsl(var(--border));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent));
+  }
+  ::-webkit-scrollbar-corner {
+    background: hsl(var(--muted));
+  }
+  /* Slim scrollbars inside menus and lists. */
+  ul[role="listbox"]::-webkit-scrollbar,
+  .scroll-slim::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  /* Form controls that are still native use the brand colours. */
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"] {
+    accent-color: hsl(var(--accent));
+  }
+  input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    border: 2px solid hsl(var(--border));
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 0.4rem 0.75rem;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  html,
+  body {
+    overflow-x: clip;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+  }
+  /* Big, loud, condensed headings. h3 and below stay in the body face. */
+  h1,
+  h2,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 1.05;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    font-synthesis: none; /* never fake-bold the condensed display face */
+    word-spacing: 0.08em;
+  }
+  h1,
+  h2 {
+    letter-spacing: 0.035em;
+    line-height: 1.15;
+  }
+  .font-display {
+    font-synthesis: none;
+    letter-spacing: 0.035em;
+  }
+  /* Everything clickable shows the pointer. */
+  a[href],
+  button:not(:disabled),
+  summary,
+  label[for],
+  select:not(:disabled),
+  [role="button"],
+  [role="option"],
+  [role="tab"],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="submit"],
+  input[type="file"] {
+    cursor: pointer;
+  }
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+  :focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+}
+
+@layer components {
+  /* Small uppercase caption used for labels, eyebrows and meta rows. */
+  .eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  /* A bordered surface that lifts on hover with a hard shadow. */
+  .brutal {
+    border: 2px solid hsl(var(--border));
+    background: hsl(var(--card));
+    box-shadow: var(--shadow-hard);
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+  .brutal-hover:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hard-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
