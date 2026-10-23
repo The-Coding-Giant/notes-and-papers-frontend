@@ -1,15 +1,15 @@
-import { UNIVERSITY_SLUG } from "@/lib/env";
 import type { PaperSummary, TermKind } from "@/lib/api/types";
 
-const base = `/${UNIVERSITY_SLUG}`;
+const base = "/universities";
 
 export const routes = {
   home: "/",
-  university: base,
-  course: (course: string) => `${base}/${course}`,
-  term: (course: string, term: string) => `${base}/${course}/${term}`,
-  subject: (course: string, term: string, subject: string) =>
-    `${base}/${course}/${term}/${subject}`,
+  universities: base,
+  university: (u: string) => `${base}/${u}`,
+  course: (u: string, course: string) => `${base}/${u}/${course}`,
+  term: (u: string, course: string, term: string) => `${base}/${u}/${course}/${term}`,
+  subject: (u: string, course: string, term: string, subject: string) =>
+    `${base}/${u}/${course}/${term}/${subject}`,
   paper: (slug: string) => `/papers/${slug}`,
   download: (slug: string) => `/papers/${slug}/download`,
   exams: "/exams",
@@ -52,8 +52,8 @@ export function paperHref(p: {
 }
 
 export function subjectHref(p: PaperSummary) {
-  if (p.course_slug && p.term_slug && p.subject_slug)
-    return routes.subject(p.course_slug, p.term_slug, p.subject_slug);
+  if (p.university_slug && p.course_slug && p.term_slug && p.subject_slug)
+    return routes.subject(p.university_slug, p.course_slug, p.term_slug, p.subject_slug);
   return p.exam_slug ? routes.exam(p.exam_slug) : routes.search();
 }
 

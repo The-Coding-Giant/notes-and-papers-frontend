@@ -9,7 +9,7 @@ import type {
   Paginated,
   PaperSummary,
   SearchResponse,
-  UniversityDetail,
+  UniversityListItem,
 } from "@/lib/api/types";
 
 export class HttpError extends Error {
@@ -45,9 +45,9 @@ async function getJson<T>(url: string, signal?: AbortSignal): Promise<T> {
   return (await res.json()) as T;
 }
 
-/** GET /api/courses */
-export const fetchCourses = (signal?: AbortSignal) =>
-  getJson<UniversityDetail>("/api/courses", signal);
+/** GET /api/universities */
+export const fetchUniversities = (signal?: AbortSignal) =>
+  getJson<UniversityListItem[]>("/api/universities", signal);
 
 /** GET /api/exams */
 export const fetchExams = (kind?: ExamSummary["kind"], signal?: AbortSignal) =>

@@ -3,7 +3,7 @@
 | Route | File | Status |
 |---|---|---|
 | `/` | src/app/page.tsx | done |
-| `/rajasthan-university[/{course}[/{term}[/{subject}]]]` | src/app/rajasthan-university/ | done |
+| `/universities[/{university}[/{course}[/{term}[/{subject}]]]]` | src/app/universities/ | done (old /rajasthan-university links redirect, 308) |
 | `/papers/{slug}` (+ OG image, bookmark, report, PDF preview) | src/app/papers/[slug]/ | done |
 | `/search` | src/app/search/page.tsx | done |
 | `/notes`, `/notes/{slug}` | src/app/notes/ | done |

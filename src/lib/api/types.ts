@@ -31,6 +31,8 @@ export interface PaperSummary {
   term_slug: string | null;
   subject_name: string | null;
   subject_slug: string | null;
+  university_slug: string | null;
+  university_name: string | null;
   exam_name: string | null;
   exam_slug: string | null;
   section: string | null;
@@ -42,6 +44,11 @@ export interface PaperSummary {
 export interface PaperDetail extends PaperSummary {
   meta_title: string | null;
   meta_description: string | null;
+  meta_keywords: string[];
+  pdf_pages: number | null;
+  pdf_size_bytes: number | null;
+  /** Our own stored copy exists: the PDF can be previewed and downloaded. */
+  file_available: boolean;
   content_excerpt: string | null;
   rights_status: RightsStatus;
   pages: number | null;
@@ -75,10 +82,29 @@ export interface UniversityDetail {
   website: string | null;
   description: string | null;
   paper_count: number;
+  course_count: number;
   courses: CourseSummary[];
 }
 
+export interface TopCourse {
+  slug: string;
+  name: string;
+  paper_count: number;
+}
+
+export interface UniversityListItem {
+  slug: string;
+  name: string;
+  website: string | null;
+  description: string | null;
+  paper_count: number;
+  course_count: number;
+  top_courses: TopCourse[];
+}
+
 export interface CourseDetail extends CourseSummary {
+  university_slug: string;
+  university_name: string;
   year_min: number | null;
   year_max: number | null;
   terms: TermSummary[];
@@ -94,6 +120,7 @@ export interface SubjectSummary {
 }
 
 export interface TermDetail {
+  university: { slug: string; name: string };
   course: { slug: string; name: string };
   term: TermSummary;
   paper_count: number;
@@ -103,6 +130,7 @@ export interface TermDetail {
 }
 
 export interface SubjectDetail {
+  university: { slug: string; name: string };
   course: { slug: string; name: string };
   term: TermSummary;
   subject: SubjectSummary;

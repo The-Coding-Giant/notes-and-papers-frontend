@@ -4,7 +4,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { PaperList } from "@/components/shared/paper-list";
 import { authedFetch } from "@/lib/api/server";
 import type { Paginated, PaperSummary } from "@/lib/api/types";
-import { parsePositiveInt } from "@/lib/routes";
+import { parsePositiveInt, routes } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Bookmarks", robots: { index: false, follow: false } };
 const SIZE = 20;
@@ -23,7 +23,7 @@ export default async function BookmarksPage(props: PageProps<"/bookmarks">) {
         <EmptyState
           title="No bookmarks yet"
           description="Tap Bookmark on any paper to keep it here for quick access."
-          action={{ href: "/rajasthan-university", label: "Browse papers" }}
+          action={{ href: routes.universities, label: "Browse papers" }}
         />
       ) : (
         <>

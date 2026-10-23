@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSearch } from "@/hooks/use-catalog";
 import type { FacetBucket } from "@/lib/api/types";
-import { parsePositiveInt } from "@/lib/routes";
+import { parsePositiveInt, routes } from "@/lib/routes";
 import type { SearchQuery } from "@/services/queries";
 import { EmptyState } from "./empty-state";
 import { ErrorBox } from "./home-sections";
@@ -112,7 +112,7 @@ export function SearchView() {
         <EmptyState
           title={params.q ? `No results for "${params.q}"` : "No results"}
           description="Check the spelling, remove a filter, or browse by course instead."
-          action={{ href: "/rajasthan-university", label: "Browse courses" }}
+          action={{ href: routes.universities, label: "Browse courses" }}
         />
       ) : data ? (
         <section

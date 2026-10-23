@@ -1,57 +1,65 @@
-import { plural } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { EmptyState } from "@/components/shared/empty-state";
 import { JsonLdScript } from "@/components/shared/json-ld";
 import { Card } from "@/components/ui/card";
-import { getCourse, getTerm, getUniversity } from "@/lib/api/public";
-import { UNIVERSITY_NAME } from "@/lib/env";
+import { getCourse, getTerm, getUniversities, getUniversity } from "@/lib/api/public";
 import { routes, yearRange } from "@/lib/routes";
 import { buildMetadata, collectionPageLd, itemListLd, termMeta } from "@/lib/seo";
+import { plural } from "@/lib/utils";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
   try {
-    const u = await getUniversity();
-    const courses = await Promise.all((u?.courses ?? []).map((c) => getCourse(c.slug)));
-    return courses.flatMap((c) =>
-      c ? c.terms.map((t) => ({ course: c.slug, term: t.slug })) : [],
-    );
+    const unis = await Promise.all((await getUniversities()).map((x) => getUniversity(x.slug)));
+    const out: { university: string; course: string; term: string }[] = [];
+    for (const u of unis) {
+      const courses = await Promise.all((u?.courses ?? []).map((c) => getCourse(u!.slug, c.slug)));
+      for (const c of courses)
+        for (const t of c?.terms ?? [])
+          out.push({ university: u!.slug, course: c!.slug, term: t.slug });
+    }
+    return out;
   } catch {
     return [];
   }
 }
 
-export async function generateMetadata(props: PageProps<"/rajasthan-university/[course]/[term]">) {
-  const { course, term } = await props.params;
-  const t = await getTerm(course, term);
+export async function generateMetadata(
+  props: PageProps<"/universities/[university]/[course]/[term]">,
+) {
+  const { university, course, term } = await props.params;
+  const t = await getTerm(university, course, term);
   if (!t) return { title: "Not found", robots: { index: false } };
   const m = termMeta(t);
   return buildMetadata({
     title: m.title,
     description: m.description,
-    path: routes.term(course, term),
+    path: routes.term(university, course, term),
     noindex: t.subjects.length === 0,
   });
 }
 
-export default async function TermPage(props: PageProps<"/rajasthan-university/[course]/[term]">) {
-  const { course, term } = await props.params;
-  const t = await getTerm(course, term);
+export default async function TermPage(
+  props: PageProps<"/universities/[university]/[course]/[term]">,
+) {
+  const { university, course, term } = await props.params;
+  const t = await getTerm(university, course, term);
   if (!t) notFound();
   const m = termMeta(t);
-  const path = routes.term(course, term);
+  const path = routes.term(university, course, term);
 
   return (
     <div className="space-y-12">
       <Breadcrumbs
         items={[
           { name: "Home", path: "/" },
-          { name: UNIVERSITY_NAME, path: routes.university },
-          { name: t.course.name, path: routes.course(course) },
+          { name: "Universities", path: routes.universities },
+          { name: t.university.name, path: routes.university(university) },
+          { name: t.course.name, path: routes.course(university, course) },
           { name: m.label, path },
         ]}
       />
@@ -75,7 +83,10 @@ export default async function TermPage(props: PageProps<"/rajasthan-university/[
           {t.subjects.map((s) => (
             <li key={s.slug}>
               <Card className="h-full transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard">
-                <Link href={routes.subject(course, term, s.slug)} className="block space-y-1 p-5">
+                <Link
+                  href={routes.subject(university, course, term, s.slug)}
+                  className="block space-y-1 p-5"
+                >
                   <h2 className="text-xl leading-tight">{s.name}</h2>
                   <p className="text-sm text-muted-foreground">
                     {plural(s.paper_count, "paper")}
@@ -93,7 +104,10 @@ export default async function TermPage(props: PageProps<"/rajasthan-university/[
         data={[
           collectionPageLd(m.h1, path, m.description),
           itemListLd(
-            t.subjects.map((s) => ({ name: s.name, path: routes.subject(course, term, s.slug) })),
+            t.subjects.map((s) => ({
+              name: s.name,
+              path: routes.subject(university, course, term, s.slug),
+            })),
           ),
         ]}
       />

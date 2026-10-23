@@ -22,7 +22,7 @@ Known caveats:
 npx wrangler login
 
 # 2. page cache storage (names must match wrangler.jsonc)
-npx wrangler r2 bucket create notes-and-papers-cache
+
 npx wrangler kv namespace create NEXT_TAG_CACHE_KV
 #    copy the printed id into wrangler.jsonc -> kv_namespaces[0].id
 

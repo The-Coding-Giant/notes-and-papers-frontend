@@ -15,7 +15,7 @@ import { Select } from "@/components/ui/select";
 
 const sel =
   "h-10 w-full border-2 border-input bg-card font-medium focus-visible:shadow-hard-sm focus-visible:outline-none placeholder:font-normal placeholder:text-muted-foreground px-2 text-sm";
-const RESTRICTED = new Set(["uoronline", "pyqonline"]);
+const RESTRICTED = new Set(["uoronline", "rtuonline", "pyqonline"]);
 
 interface TestResult {
   reachable: boolean;

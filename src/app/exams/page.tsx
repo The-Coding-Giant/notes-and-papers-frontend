@@ -57,7 +57,6 @@ export default async function ExamsPage() {
   const withPapers = all.filter((e) => e.paper_count > 0);
   const exams = withPapers.filter((e) => e.kind === "exam");
   const boards = withPapers.filter((e) => e.kind === "board");
-  const sites = all.filter((e) => e.kind === "university_site");
 
   return (
     <div className="space-y-12">
@@ -80,29 +79,6 @@ export default async function ExamsPage() {
       </header>
       <Group id="competitive-exams" title="Competitive exams" items={exams} />
       <Group id="school-boards" title="School boards" items={boards} />
-      {sites.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-3xl sm:text-4xl">Other university sites</h2>
-          <ul className="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2 lg:grid-cols-3">
-            {sites.map((s) => (
-              <li key={s.slug}>
-                {s.source_url ? (
-                  <a
-                    className="text-link hover:underline"
-                    href={s.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {s.name}
-                  </a>
-                ) : (
-                  s.name
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </div>
   );
 }

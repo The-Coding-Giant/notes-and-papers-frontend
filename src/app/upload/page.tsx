@@ -5,6 +5,7 @@ import { getCatalog, getFeatures } from "@/lib/api/public";
 import type { CatalogCourse } from "@/lib/api/types";
 import { getMe } from "@/lib/api/server";
 import { redirect } from "next/navigation";
+import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = {
   title: "Upload a paper or notes",
@@ -19,8 +20,8 @@ export default async function UploadPage() {
         <h1 className="text-5xl sm:text-6xl">Upload a paper or notes</h1>
         <EmptyState
           title="Uploads are paused"
-          description="For now this site links to papers on their original sources instead of storing files. Uploads will return later."
-          action={{ href: "/rajasthan-university", label: "Browse papers" }}
+          description="Uploads are paused for now and will return later."
+          action={{ href: routes.universities, label: "Browse papers" }}
         />
       </div>
     );

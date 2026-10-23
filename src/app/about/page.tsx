@@ -21,9 +21,8 @@ export default function AboutPage() {
       </p>
       <h2>Where papers come from</h2>
       <p>
-        Papers belong to their universities. We publish only from sources we are permitted to use,
-        link to the original where we are not, and remove anything on request. See the{" "}
-        <a href="/takedown">takedown page</a>.
+        Papers belong to their universities. Every PDF on this site is our own cleaned copy, and we
+        remove anything on request. See the <a href="/takedown">takedown page</a>.
       </p>
     </ProsePage>
   );

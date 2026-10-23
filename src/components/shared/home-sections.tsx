@@ -4,8 +4,8 @@ import Link from "next/link";
 import { ArrowRight, GraduationCap, RefreshCw, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCourses, useExams, useLatestPapers } from "@/hooks/use-catalog";
-import type { ExamSummary, Paginated, PaperSummary, UniversityDetail } from "@/lib/api/types";
+import { useExams, useLatestPapers, useUniversities } from "@/hooks/use-catalog";
+import type { ExamSummary, Paginated, PaperSummary, UniversityListItem } from "@/lib/api/types";
 import { routes, yearRange } from "@/lib/routes";
 import { plural } from "@/lib/utils";
 import { EmptyState } from "./empty-state";
@@ -84,49 +84,53 @@ function TileSkeletons() {
   );
 }
 
-/** Courses of the university. Data: GET /api/courses (server-rendered first, refreshed from the API on load). */
-export function CoursesSection({ initial }: { initial: UniversityDetail | null }) {
-  const { data, isPending, isError, error, refetch } = useCourses(initial);
-  const courses = (data?.courses ?? []).filter((c) => c.paper_count > 0).slice(0, 12);
+/** Universities with their biggest courses. Data: GET /api/universities (server-rendered first, refreshed on load). */
+export function UniversitiesSection({ initial }: { initial: UniversityListItem[] | null }) {
+  const { data, isPending, isError, error, refetch } = useUniversities(initial);
+  const unis = (data ?? []).filter((u) => u.paper_count > 0);
 
   return (
     <section aria-labelledby="courses-heading" className="space-y-8">
       <SectionHeading
         id="courses-heading"
         eyebrow="University exams"
-        title="Browse by course"
-        href={routes.university}
-        linkLabel="All courses"
+        title="Browse by university"
+        href={routes.universities}
+        linkLabel="All universities"
       />
       {isPending ? (
         <TileSkeletons />
-      ) : isError && courses.length === 0 ? (
+      ) : isError && unis.length === 0 ? (
         <ErrorBox message={error.message} onRetry={() => void refetch()} />
-      ) : courses.length > 0 ? (
+      ) : unis.length > 0 ? (
         <TileGrid>
-          {courses.map((c) => (
-            <li key={c.slug}>
-              <Link
-                href={routes.course(c.slug)}
-                className="brutal brutal-hover flex h-full flex-col justify-between gap-6 p-5"
-              >
-                <span className="flex items-start justify-between">
+          {unis.map((u) => (
+            <li key={u.slug}>
+              <div className="brutal flex h-full flex-col justify-between gap-5 p-5">
+                <Link href={routes.university(u.slug)} className="block space-y-3">
                   <span className="grid size-11 place-items-center border-2 border-border bg-primary">
                     <GraduationCap className="size-5" aria-hidden="true" />
                   </span>
-                  {c.level && (
-                    <span className="eyebrow border-2 border-border px-1.5 py-0.5">{c.level}</span>
-                  )}
-                </span>
-                <span>
                   <span className="block font-display text-3xl uppercase leading-[1.2]">
-                    {c.name}
+                    {u.name}
                   </span>
-                  <span className="eyebrow mt-2 block text-muted-foreground">
-                    {plural(c.paper_count, "paper")}
+                  <span className="eyebrow block text-muted-foreground">
+                    {plural(u.paper_count, "paper")} · {plural(u.course_count, "course")}
                   </span>
-                </span>
-              </Link>
+                </Link>
+                <ul className="flex flex-wrap gap-2">
+                  {u.top_courses.map((c) => (
+                    <li key={c.slug}>
+                      <Link
+                        href={routes.course(u.slug, c.slug)}
+                        className="eyebrow border-2 border-border px-1.5 py-0.5 hover:bg-primary"
+                      >
+                        {c.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </li>
           ))}
         </TileGrid>

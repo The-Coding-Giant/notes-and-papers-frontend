@@ -10,15 +10,14 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import {
-  CoursesSection,
+  UniversitiesSection,
   ExamsSection,
   LatestPapersSection,
 } from "@/components/shared/home-sections";
 import { SearchBar } from "@/components/shared/search-bar";
 import { buttonVariants } from "@/components/ui/button";
-import { getExams, getLatestPapers, getStats, getUniversity } from "@/lib/api/public";
+import { getExams, getLatestPapers, getStats, getUniversities } from "@/lib/api/public";
 import { getNavFlags } from "@/lib/api/nav-flags";
-import { UNIVERSITY_NAME } from "@/lib/env";
 import { routes } from "@/lib/routes";
 import { buildMetadata } from "@/lib/seo";
 import { cn, plural } from "@/lib/utils";
@@ -33,8 +32,8 @@ export const metadata = buildMetadata({
 });
 
 const QUICK = [
-  { label: "BCA", href: "/rajasthan-university/bca" },
-  { label: "BSc Part 1", href: "/rajasthan-university/bsc/part-1" },
+  { label: "BCA", href: "/universities/rajasthan-university/bca" },
+  { label: "BSc Part 1", href: "/universities/rajasthan-university/bsc/part-1" },
   { label: "UPSC", href: "/exams/upsc" },
   { label: "NEET", href: "/exams/neet" },
   { label: "GATE", href: "/exams/gate" },
@@ -48,7 +47,7 @@ const QUICK = [
  */
 async function load() {
   const [uni, latest, exams, stats] = await Promise.allSettled([
-    getUniversity(),
+    getUniversities(),
     getLatestPapers(8),
     getExams("exam"),
     getStats(),
@@ -74,10 +73,10 @@ export default async function HomePage() {
 
   const categories = [
     {
-      href: routes.university,
+      href: routes.universities,
       icon: Building2,
       title: "University exams",
-      text: `${UNIVERSITY_NAME} papers by course, part or semester and subject.`,
+      text: "Rajasthan University, RTU and more: papers by course, term and subject.",
       count: uniPapers,
       tone: "bg-primary",
     },
@@ -173,7 +172,7 @@ export default async function HomePage() {
           </dl>
           <ul className="space-y-2 text-sm font-medium">
             <li className="flex items-center gap-2">
-              <ShieldCheck className="size-4" aria-hidden="true" /> Linked to the original source
+              <ShieldCheck className="size-4" aria-hidden="true" /> Clean PDFs, hosted by us
             </li>
             <li className="flex items-center gap-2">
               <Download className="size-4" aria-hidden="true" /> Free download with an account
@@ -224,7 +223,7 @@ export default async function HomePage() {
       </section>
 
       <ExamsSection initial={exams} />
-      <CoursesSection initial={university} />
+      <UniversitiesSection initial={university} />
       <LatestPapersSection initial={latest} />
 
       {/* HOW IT WORKS */}

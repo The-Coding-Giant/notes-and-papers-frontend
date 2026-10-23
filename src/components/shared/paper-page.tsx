@@ -11,7 +11,6 @@ import { ReportDialog } from "@/components/shared/report-dialog";
 import { DownloadLink } from "@/components/shared/download-link";
 import { TrackOnMount } from "@/components/shared/tracker";
 import { getPaper, getPaperRedirect } from "@/lib/api/public";
-import { UNIVERSITY_NAME } from "@/lib/env";
 import { kindLabel, paperContext, paperHref, routes, subjectHref } from "@/lib/routes";
 import { buildMetadata, faqLd, learningResourceLd, paperMeta } from "@/lib/seo";
 
@@ -24,9 +23,11 @@ export async function paperMetadata(slug: string) {
     description: m.description,
     path: paperHref(p),
     type: "article",
+    keywords: p.meta_keywords,
     // Thin pages (no extracted text and no file metadata) stay out of the index.
     // Link-only pages carry metadata, not file text, by design, so they stay indexable.
-    noindex: !p.content_excerpt && !p.pages && p.rights_status !== "link_only",
+    // A page still being prepared keeps its metadata and stays indexable; only an empty shell is kept out.
+    noindex: !p.content_excerpt && !p.file_available && !p.title,
   });
 }
 
@@ -51,9 +52,11 @@ export async function PaperPage({
   if (paperHref(p) !== here) permanentRedirect(paperHref(p));
   const selfPath = paperHref(p);
   const m = paperMeta(p);
-  const linkOnly = p.rights_status === "link_only";
+  const ready = p.file_available;
 
   const isCourse = Boolean(p.course_slug && p.term_slug);
+  const uniName = p.university_name ?? "";
+  const uniSlug = p.university_slug ?? "";
   const topic = p.subject_name ?? p.title;
   const faqs = [
     {
@@ -66,16 +69,19 @@ export async function PaperPage({
     {
       q: `Which exam is this paper from?`,
       a: isCourse
-        ? `It is a ${kindLabel(p.kind).toLowerCase()} for ${p.course_name} ${m.label} of ${UNIVERSITY_NAME}${p.session ? `, ${p.session} session` : ""}.`
+        ? `It is a ${kindLabel(p.kind).toLowerCase()} for ${p.course_name} ${m.label} of ${uniName}${p.session ? `, ${p.session} session` : ""}.`
         : `It is a ${kindLabel(p.kind).toLowerCase()} listed under ${p.exam_name ?? "its exam"}${p.year ? `, ${p.year}` : ""}.`,
     },
   ];
   const crumbs = isCourse
     ? [
         { name: "Home", path: "/" },
-        { name: UNIVERSITY_NAME, path: routes.university },
-        { name: p.course_name!, path: routes.course(p.course_slug!) },
-        { name: m.label, path: routes.term(p.course_slug!, p.term_slug!) },
+        {
+          name: uniName || "Universities",
+          path: uniSlug ? routes.university(uniSlug) : routes.universities,
+        },
+        { name: p.course_name!, path: routes.course(uniSlug, p.course_slug!) },
+        { name: m.label, path: routes.term(uniSlug, p.course_slug!, p.term_slug!) },
         { name: p.subject_name ?? "Paper", path: subjectHref(p) },
         { name: p.year ? String(p.year) : "Paper", path: selfPath },
       ]
@@ -102,7 +108,7 @@ export async function PaperPage({
           <h1 className="max-w-6xl text-5xl sm:text-7xl lg:text-8xl">{m.h1}</h1>
           <p className="text-xl text-muted-foreground">
             {paperContext(p)}
-            {isCourse ? ` · ${UNIVERSITY_NAME}` : ""}
+            {isCourse && uniName ? ` · ${uniName}` : ""}
           </p>
         </div>
 
@@ -127,20 +133,29 @@ export async function PaperPage({
         <div className="flex flex-wrap items-center gap-3">
           {/* Same-origin route: sends visitors to log in first (and back here), then to the PDF. The source URL
               is never written into this page. */}
-          <DownloadLink slug={slug} href={routes.download(slug)}>
-            <Download className="size-5" aria-hidden="true" /> Download PDF
-          </DownloadLink>
+          {ready ? (
+            <DownloadLink slug={slug} href={routes.download(slug)}>
+              <Download className="size-5" aria-hidden="true" /> Download PDF
+            </DownloadLink>
+          ) : (
+            <span className="inline-flex h-14 items-center gap-2 border-2 border-border bg-muted px-7 text-base font-bold uppercase tracking-wide text-muted-foreground">
+              <Download className="size-5" aria-hidden="true" /> PDF coming soon
+            </span>
+          )}
           <BookmarkButton slug={slug} />
           <ReportDialog slug={slug} />
         </div>
-        {linkOnly && (
+        {ready ? (
+          <p className="eyebrow text-muted-foreground">Free account required to download</p>
+        ) : (
           <p className="eyebrow text-muted-foreground">
-            Free account required · The PDF is hosted by the original source and opens from there
+            We are preparing this PDF with our cover pages. It is added automatically, usually
+            within a day.
           </p>
         )}
       </header>
 
-      {!linkOnly && p.pages ? <PdfPreview slug={slug} title={p.title} /> : null}
+      {ready && p.pages ? <PdfPreview slug={slug} title={p.title} /> : null}
 
       <section aria-labelledby="about-heading" className="max-w-5xl space-y-5">
         <h2 id="about-heading" className="text-3xl sm:text-4xl">
@@ -150,7 +165,7 @@ export async function PaperPage({
           This is the {p.year ? `${p.year} ` : ""}
           {topic} {kindLabel(p.kind).toLowerCase()}
           {isCourse
-            ? ` for ${p.course_name} ${m.label} of ${UNIVERSITY_NAME}`
+            ? ` for ${p.course_name} ${m.label}${uniName ? ` of ${uniName}` : ""}`
             : p.exam_name
               ? ` (${p.exam_name})`
               : ""}

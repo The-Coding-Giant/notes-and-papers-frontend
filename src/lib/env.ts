@@ -8,5 +8,3 @@ export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "";
 export const CONTACT_PHONE = process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "";
 
 export const SITE_NAME = "Notes & Papers";
-export const UNIVERSITY_SLUG = "rajasthan-university";
-export const UNIVERSITY_NAME = "Rajasthan University";

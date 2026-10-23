@@ -6,6 +6,8 @@ initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Cloudflare Workers has no image optimiser without an extra paid product; the site only shows a few small icons.
+  images: { unoptimized: true },
   poweredByHeader: false,
   turbopack: {
     rules: {
@@ -14,6 +16,21 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
+  },
+  // The first release served one university at /rajasthan-university; keep those links (and their ranking) alive.
+  async redirects() {
+    return [
+      {
+        source: "/rajasthan-university/:path*",
+        destination: "/universities/rajasthan-university/:path*",
+        permanent: true,
+      },
+      {
+        source: "/rajasthan-university",
+        destination: "/universities/rajasthan-university",
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [

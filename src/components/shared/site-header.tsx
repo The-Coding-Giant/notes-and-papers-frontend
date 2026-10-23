@@ -14,7 +14,7 @@ import { UserMenu } from "./user-menu";
 export async function SiteHeader() {
   const flags = await getNavFlags();
   const NAV = [
-    { href: routes.university, label: "University" },
+    { href: routes.universities, label: "Universities" },
     { href: routes.exams, label: "Exams" },
     ...(flags.notes ? [{ href: "/notes", label: "Notes" }] : []),
     { href: "/search", label: "Search" },

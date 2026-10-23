@@ -4,7 +4,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { PaperCard } from "@/components/shared/paper-card";
 import { authedFetch } from "@/lib/api/server";
 import type { DownloadItem, Paginated } from "@/lib/api/types";
-import { parsePositiveInt } from "@/lib/routes";
+import { parsePositiveInt, routes } from "@/lib/routes";
 
 export const metadata: Metadata = {
   title: "Download history",
@@ -26,7 +26,7 @@ export default async function DownloadsPage(props: PageProps<"/downloads">) {
         <EmptyState
           title="No downloads yet"
           description="Papers you download while logged in will be listed here."
-          action={{ href: "/rajasthan-university", label: "Browse papers" }}
+          action={{ href: routes.universities, label: "Browse papers" }}
         />
       ) : (
         <>

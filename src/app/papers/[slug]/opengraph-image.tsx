@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getPaper } from "@/lib/api/public";
-import { SITE_NAME, UNIVERSITY_NAME } from "@/lib/env";
+import { SITE_NAME } from "@/lib/env";
 import { termLabel } from "@/lib/routes";
 
 export const alt = "Question paper preview";
@@ -18,9 +18,9 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
     : "Question Paper";
   const sub = p
     ? p.course_name
-      ? `${p.course_name} ${termLabel(p.term_kind, p.term_number)} · ${UNIVERSITY_NAME}`
+      ? `${p.course_name} ${termLabel(p.term_kind, p.term_number)}${p.university_name ? ` · ${p.university_name}` : ""}`
       : (p.exam_name ?? SITE_NAME)
-    : UNIVERSITY_NAME;
+    : SITE_NAME;
 
   return new ImageResponse(
     <div

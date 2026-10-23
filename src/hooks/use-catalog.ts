@@ -6,10 +6,10 @@ import type {
   Paginated,
   PaperSummary,
   SearchResponse,
-  UniversityDetail,
+  UniversityListItem,
 } from "@/lib/api/types";
 import {
-  fetchCourses,
+  fetchUniversities,
   fetchExams,
   fetchPapers,
   fetchSearch,
@@ -20,10 +20,10 @@ import {
  * `initial` is the server-rendered copy (so the HTML has real content for search engines and no-JS visitors).
  * `refetchOnMount: "always"` then asks the JSON API for fresh data as soon as the page is interactive.
  */
-export function useCourses(initial?: UniversityDetail | null) {
+export function useUniversities(initial?: UniversityListItem[] | null) {
   return useQuery({
-    queryKey: ["courses"],
-    queryFn: ({ signal }) => fetchCourses(signal),
+    queryKey: ["universities"],
+    queryFn: ({ signal }) => fetchUniversities(signal),
     initialData: initial ?? undefined,
     refetchOnMount: "always",
     staleTime: 0,

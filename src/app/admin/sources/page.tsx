@@ -6,7 +6,7 @@ import { authedFetch, getMe } from "@/lib/api/server";
 import type { AdminSource } from "@/lib/api/types";
 
 // Mirrors app/pipeline/adapters/registry.py in the backend.
-const ADAPTERS = ["generic_site", "uniraj", "uoronline", "pyqonline", "uploads"];
+const ADAPTERS = ["generic_site", "uniraj", "uoronline", "rtuonline", "pyqonline", "uploads"];
 
 export default async function SourcesPage() {
   if ((await getMe())?.role !== "admin") return <NoPermission />;
@@ -15,7 +15,7 @@ export default async function SourcesPage() {
     <>
       <PageHeader
         title="Sources"
-        description="Where papers come from. uoronline and pyqonline stay disabled unless you record written permission from the site owner."
+        description="Where papers come from. uoronline, rtuonline and pyqonline stay disabled unless you record written permission from the site owner."
       />
       <div className="space-y-3">
         {sources.map((s) => (

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_NAME, SITE_URL, UNIVERSITY_NAME } from "@/lib/env";
+import { SITE_NAME, SITE_URL } from "@/lib/env";
 import type { CourseDetail, PaperDetail, SubjectDetail, TermDetail } from "@/lib/api/types";
 import { paperHref, termLabel, yearRange } from "@/lib/routes";
 
@@ -20,6 +20,7 @@ interface MetaInput {
   /** Thin or private pages. */
   noindex?: boolean;
   image?: string;
+  keywords?: string[];
   type?: "website" | "article";
 }
 
@@ -29,6 +30,7 @@ export function buildMetadata({
   path,
   noindex,
   image,
+  keywords,
   type = "website",
 }: MetaInput): Metadata {
   // "Page | Notes & Papers" when it fits in 60 characters; long titles keep their own words instead of the brand.
@@ -42,6 +44,7 @@ export function buildMetadata({
   return {
     title: { absolute: t },
     description: d,
+    ...(keywords?.length ? { keywords } : {}),
     alternates: { canonical: url },
     robots: noindex ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
@@ -68,8 +71,8 @@ export function courseMeta(c: CourseDetail) {
   const range = yearRange(c.year_min, c.year_max);
   const terms = c.terms.map((t) => termLabel(t.kind, t.number)).join(", ");
   return {
-    title: `${c.name} Question Papers${range ? ` ${range}` : ""} - ${UNIVERSITY_NAME}`,
-    description: `Download ${c.name} previous year question papers of ${UNIVERSITY_NAME}${terms ? ` for all terms (${terms})` : ""}. Free PDFs, subject-wise.`,
+    title: `${c.name} Question Papers${range ? ` ${range}` : ""} - ${c.university_name}`,
+    description: `Download ${c.name} previous year question papers of ${c.university_name}${terms ? ` for all terms (${terms})` : ""}. Free PDFs, subject-wise.`,
     h1: `${c.name} Previous Year Papers`,
   };
 }
@@ -121,7 +124,7 @@ export function paperMeta(p: PaperDetail) {
   return {
     title:
       p.meta_title ??
-      `${p.subject_name} ${year}Question Paper - ${p.course_name} ${label} ${UNIVERSITY_NAME}`,
+      `${p.subject_name} ${year}Question Paper - ${p.course_name} ${label}${p.university_name ? ` ${p.university_name}` : ""}`,
     description:
       p.meta_description ??
       `${p.subject_name} ${p.course_name} ${label} ${year}question paper PDF.${p.paper_code ? ` Paper code ${p.paper_code}.` : ""} View online or download free.`,
@@ -188,6 +191,7 @@ export function learningResourceLd(p: PaperDetail, title: string, description: s
     "@context": "https://schema.org",
     "@type": "LearningResource",
     name: title,
+    ...(p.meta_keywords?.length ? { keywords: p.meta_keywords.join(", ") } : {}),
     description,
     url: absoluteUrl(paperHref(p)),
     learningResourceType: p.kind === "notes" ? "Notes" : "Exam",
@@ -199,7 +203,7 @@ export function learningResourceLd(p: PaperDetail, title: string, description: s
     ...(p.year ? { temporalCoverage: String(p.year) } : {}),
     provider: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
     about: p.course_name
-      ? { "@type": "CollegeOrUniversity", name: UNIVERSITY_NAME }
+      ? { "@type": "CollegeOrUniversity", name: p.university_name ?? SITE_NAME }
       : { "@type": "Thing", name: p.exam_name ?? p.title },
   };
 }

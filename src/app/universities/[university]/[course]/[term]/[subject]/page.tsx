@@ -6,24 +6,23 @@ import { JsonLdScript } from "@/components/shared/json-ld";
 import { PaperList } from "@/components/shared/paper-list";
 import { getSubject } from "@/lib/api/public";
 import type { PaperSummary } from "@/lib/api/types";
-import { UNIVERSITY_NAME } from "@/lib/env";
-import { routes, yearRange } from "@/lib/routes";
+import { paperHref, routes, yearRange } from "@/lib/routes";
 import { buildMetadata, collectionPageLd, faqLd, itemListLd, subjectMeta } from "@/lib/seo";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-type Props = PageProps<"/rajasthan-university/[course]/[term]/[subject]">;
+type Props = PageProps<"/universities/[university]/[course]/[term]/[subject]">;
 
 export async function generateMetadata(props: Props) {
-  const { course, term, subject } = await props.params;
-  const s = await getSubject(course, term, subject);
+  const { university, course, term, subject } = await props.params;
+  const s = await getSubject(university, course, term, subject);
   if (!s) return { title: "Not found", robots: { index: false } };
   const m = subjectMeta(s);
   return buildMetadata({
     title: m.title,
     description: m.description,
-    path: routes.subject(course, term, subject),
+    path: routes.subject(university, course, term, subject),
     noindex: s.papers.length === 0,
   });
 }
@@ -41,11 +40,11 @@ function byYear(papers: PaperSummary[]) {
 }
 
 export default async function SubjectPage(props: Props) {
-  const { course, term, subject } = await props.params;
-  const s = await getSubject(course, term, subject);
+  const { university, course, term, subject } = await props.params;
+  const s = await getSubject(university, course, term, subject);
   if (!s) notFound();
   const m = subjectMeta(s);
-  const path = routes.subject(course, term, subject);
+  const path = routes.subject(university, course, term, subject);
   const range = yearRange(s.subject.year_min, s.subject.year_max);
 
   const faqs = [
@@ -59,7 +58,7 @@ export default async function SubjectPage(props: Props) {
     },
     {
       q: `Which university are these ${s.subject.name} papers from?`,
-      a: `They are previous year examination papers of ${UNIVERSITY_NAME} (UNIRAJ) for ${s.course.name} ${m.label}.`,
+      a: `They are previous year examination papers of ${s.university.name} for ${s.course.name} ${m.label}.`,
     },
   ];
 
@@ -68,9 +67,10 @@ export default async function SubjectPage(props: Props) {
       <Breadcrumbs
         items={[
           { name: "Home", path: "/" },
-          { name: UNIVERSITY_NAME, path: routes.university },
-          { name: s.course.name, path: routes.course(course) },
-          { name: m.label, path: routes.term(course, term) },
+          { name: "Universities", path: routes.universities },
+          { name: s.university.name, path: routes.university(university) },
+          { name: s.course.name, path: routes.course(university, course) },
+          { name: m.label, path: routes.term(university, course, term) },
           { name: s.subject.name, path },
         ]}
       />
@@ -78,7 +78,7 @@ export default async function SubjectPage(props: Props) {
         <h1 className="text-5xl sm:text-6xl">{m.h1}</h1>
         <p className="max-w-3xl text-muted-foreground">
           Previous year {s.subject.name} question papers for {s.course.name} {m.label},{" "}
-          {UNIVERSITY_NAME}. {m.years} year{m.years === 1 ? "" : "s"} available
+          {s.university.name}. {m.years} year{m.years === 1 ? "" : "s"} available
           {range ? ` (${range})` : ""}
           {s.subject.paper_code ? `. Paper code ${s.subject.paper_code}` : ""}. Newest first.
         </p>
@@ -110,7 +110,7 @@ export default async function SubjectPage(props: Props) {
       <JsonLdScript
         data={[
           collectionPageLd(m.h1, path, m.description),
-          itemListLd(s.papers.map((p) => ({ name: p.title, path: routes.paper(p.slug) }))),
+          itemListLd(s.papers.map((p) => ({ name: p.title, path: paperHref(p) }))),
           faqLd(faqs),
         ]}
       />

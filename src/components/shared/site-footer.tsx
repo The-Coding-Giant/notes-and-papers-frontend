@@ -11,7 +11,7 @@ export async function SiteFooter() {
     {
       title: "Explore",
       links: [
-        { href: routes.university, label: "Rajasthan University" },
+        { href: routes.universities, label: "Universities" },
         { href: routes.exams, label: "Competitive exams" },
         ...(flags.notes ? [{ href: "/notes", label: "Notes" }] : []),
         { href: "/search", label: "Search papers" },

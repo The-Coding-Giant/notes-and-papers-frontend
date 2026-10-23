@@ -16,7 +16,7 @@
   without JS and filters are plain GET forms. Only the suggestion dropdown is client-side.
 - **ADR-006 Sitemaps are route handlers**, not `app/sitemap.ts`, to match the spec URLs
   (`/sitemap.xml` index, `/sitemaps/{type}/{n}.xml`).
-- **ADR-007 Degraded rendering.** Home and `/rajasthan-university` catch API failures and render empty states with a
+- **ADR-007 Degraded rendering.** Home and `/universities/{university}` catch API failures and render empty states with a
   1h revalidate; other pages let errors reach `error.tsx` so a bad render is never cached. The pipeline should also
   send `paths` to `/api/revalidate` for these two pages.
 - **ADR-008 Cloudflare deploy is pending.** `@opennextjs/cloudflare`, `wrangler.jsonc` and the R2/KV incremental

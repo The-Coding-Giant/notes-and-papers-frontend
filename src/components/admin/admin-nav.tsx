@@ -13,6 +13,7 @@ import {
   Inbox,
   Radio,
   Search,
+  Server,
   Upload,
   Settings,
   Users,
@@ -35,6 +36,7 @@ const ITEMS = [
   { href: "/admin/imports", label: "Data imports", icon: Upload, admin: true },
   { href: "/admin/insights", label: "Search insights", icon: Search, admin: true },
   { href: "/admin/users", label: "Users", icon: Users, admin: true },
+  { href: "/admin/system", label: "System status", icon: Server, admin: true },
   { href: "/admin/settings", label: "Settings", icon: Settings, admin: true },
   { href: "/admin/audit", label: "Audit log", icon: History, admin: true },
 ];

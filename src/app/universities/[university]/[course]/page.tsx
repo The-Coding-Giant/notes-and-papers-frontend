@@ -1,53 +1,55 @@
-import { plural } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { EmptyState } from "@/components/shared/empty-state";
 import { JsonLdScript } from "@/components/shared/json-ld";
 import { Card } from "@/components/ui/card";
-import { getCourse, getUniversity } from "@/lib/api/public";
-import { UNIVERSITY_NAME } from "@/lib/env";
+import { getCourse, getUniversities, getUniversity } from "@/lib/api/public";
 import { routes, termLabel } from "@/lib/routes";
 import { buildMetadata, collectionPageLd, courseMeta } from "@/lib/seo";
+import { plural } from "@/lib/utils";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
   try {
-    const u = await getUniversity();
-    return (u?.courses ?? []).map((c) => ({ course: c.slug }));
+    const all = await Promise.all((await getUniversities()).map((x) => getUniversity(x.slug)));
+    return all.flatMap((u) =>
+      (u?.courses ?? []).map((c) => ({ university: u!.slug, course: c.slug })),
+    );
   } catch {
     return []; // API unreachable at build time: fall back to on-demand ISR
   }
 }
 
-export async function generateMetadata(props: PageProps<"/rajasthan-university/[course]">) {
-  const { course } = await props.params;
-  const c = await getCourse(course);
+export async function generateMetadata(props: PageProps<"/universities/[university]/[course]">) {
+  const { university, course } = await props.params;
+  const c = await getCourse(university, course);
   if (!c) return { title: "Course not found", robots: { index: false } };
   const m = courseMeta(c);
   return buildMetadata({
     title: m.title,
     description: m.description,
-    path: routes.course(course),
+    path: routes.course(university, course),
     noindex: c.paper_count === 0,
   });
 }
 
-export default async function CoursePage(props: PageProps<"/rajasthan-university/[course]">) {
-  const { course } = await props.params;
-  const c = await getCourse(course);
+export default async function CoursePage(props: PageProps<"/universities/[university]/[course]">) {
+  const { university, course } = await props.params;
+  const c = await getCourse(university, course);
   if (!c) notFound();
   const m = courseMeta(c);
-  const path = routes.course(course);
+  const path = routes.course(university, course);
 
   return (
     <div className="space-y-12">
       <Breadcrumbs
         items={[
           { name: "Home", path: "/" },
-          { name: UNIVERSITY_NAME, path: routes.university },
+          { name: "Universities", path: routes.universities },
+          { name: c.university_name, path: routes.university(university) },
           { name: c.name, path },
         ]}
       />
@@ -55,7 +57,7 @@ export default async function CoursePage(props: PageProps<"/rajasthan-university
         <h1 className="text-5xl sm:text-6xl">{m.h1}</h1>
         <p className="max-w-3xl text-muted-foreground">
           {c.description ??
-            `${c.name} is a ${c.scheme === "semester" ? "semester" : "annual"}-scheme programme of ${UNIVERSITY_NAME}. We have ${c.paper_count} previous year question papers across ${c.terms.length} ${c.scheme === "semester" ? "semesters" : "parts"}. Choose yours below.`}
+            `${c.name} is a ${c.scheme === "semester" ? "semester" : "annual"}-scheme programme of ${c.university_name}. We have ${c.paper_count} previous year question papers across ${c.terms.length} ${c.scheme === "semester" ? "semesters" : "parts"}. Choose yours below.`}
         </p>
       </header>
 
@@ -69,7 +71,10 @@ export default async function CoursePage(props: PageProps<"/rajasthan-university
           {c.terms.map((t) => (
             <li key={t.slug}>
               <Card className="h-full transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard">
-                <Link href={routes.term(course, t.slug)} className="block space-y-1 p-5">
+                <Link
+                  href={routes.term(university, course, t.slug)}
+                  className="block space-y-1 p-5"
+                >
                   <h2 className="text-2xl">{termLabel(t.kind, t.number)}</h2>
                   <p className="text-sm text-muted-foreground">
                     {plural(t.subject_count, "subject")} · {plural(t.paper_count, "paper")}

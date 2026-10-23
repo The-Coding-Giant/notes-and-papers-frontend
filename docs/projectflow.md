@@ -46,13 +46,13 @@ for Rajasthan University (UNIRAJ) by course, part/semester, subject and year. Ex
 | Worker / automation | Python, same codebase as API (`apps/api`), run as a CLI by **GitHub Actions** (scheduled + manual). No always-on worker process |
 | Database | PostgreSQL 15+ (Supabase free tier), extensions `pg_trgm`, `unaccent`, `pgcrypto` |
 | Auth | Supabase Auth (email+password, Google). FastAPI verifies the Supabase JWT |
-| File storage | **Cloudflare R2** (S3-compatible, use `boto3`) for PDFs and thumbnails |
+| File storage | **Backblaze B2** (S3-compatible, use `boto3`) for PDFs and thumbnails |
 | Optional backup | Private Telegram channel via bot (backup only, never served to users) |
 | Search | Postgres full-text (`tsvector`) + `pg_trgm` typo tolerance. Interface is abstract so Typesense/Meilisearch can replace it later |
 | PDF processing | `pypdf`/`pdfplumber` (text), `pdf2image` + Tesseract (OCR fallback), thumbnails of page 1 |
 | HTTP crawling | `requests` / `httpx` + stdlib `html.parser` (port of existing `crawler.py`) |
 | Email / alerts | Resend (email), Telegram bot (alerts) |
-| Hosting | Frontend: **Cloudflare** (Workers/Pages via `@opennextjs/cloudflare`). API: **Render** free web service. Database/Auth: **Supabase**. Files: **Cloudflare R2**. Automation: **GitHub Actions**. See section 5A |
+| Hosting | Frontend: **Cloudflare** (Workers/Pages via `@opennextjs/cloudflare`). API: **Render** free web service. Database/Auth: **Supabase**. Files: **Backblaze B2**. Automation: **GitHub Actions**. See section 5A |
 | CI | GitHub Actions: lint, tests, build (`ci.yml`) |
 | Analytics | Google Search Console API + Plausible (or GA4) |
 
@@ -109,7 +109,7 @@ Example slugs to support in the normalizer: `bsc-part-1-optics-1170-3-2023`,
 | API | Render free web service (Docker or native Python) | FastAPI only. **Sleeps after ~15 min idle** and has 512 MB RAM, so it must never run long jobs or OCR |
 | Keep-alive | UptimeRobot or cron-job.org pinging `GET /healthz` every 10 min | Avoids cold starts for dynamic calls (search, auth). Public pages are static and do not depend on it |
 | Database + Auth | Supabase free (500 MB DB) | Use the **pooled** connection string for the API. Daily automation also prevents the 1-week inactivity pause |
-| Files | Cloudflare R2 (10 GB free) | PDFs, thumbnails. Private bucket, signed URLs |
+| Files | Backblaze B2 (10 GB free) | PDFs, thumbnails. Private bucket, signed URLs |
 | Automation | **GitHub Actions** | Daily crawl/pipeline, SEO sync, weekly report, link check. ~7 GB RAM, 6 h job limit |
 | Secrets | GitHub Actions secrets, Render env vars, Cloudflare env vars | Same names as section 16 |
 
@@ -257,10 +257,11 @@ Other jobs: daily Search Console sync (`seo-sync`), weekly report, weekly link c
 ### Routes
 ```
 /                                              home: hero search, popular courses, latest papers
-/rajasthan-university                          university page
-/rajasthan-university/{course}                 course page (all terms)
-/rajasthan-university/{course}/{term}          term page (subjects + years)
-/rajasthan-university/{course}/{term}/{subject}  subject page (all years, newest first)
+/universities                                  all universities
+/universities/{university}                    university page
+/universities/{university}/{course}           course page (all terms)
+/universities/{university}/{course}/{term}  term page (subjects + years)
+/universities/{university}/{course}/{term}/{subject}  subject page (all years, newest first)
 /papers/{slug}                                 paper page
 /notes   /notes/{slug}                         notes listing / page
 /search                                        search with filters + pagination

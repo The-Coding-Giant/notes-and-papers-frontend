@@ -1,4 +1,3 @@
-import { UNIVERSITY_SLUG } from "@/lib/env";
 import { apiFetch, apiFetchOrNull } from "./client";
 import type {
   CatalogCourse,
@@ -14,9 +13,8 @@ import type {
   SubjectDetail,
   TermDetail,
   UniversityDetail,
+  UniversityListItem,
 } from "./types";
-
-const U = UNIVERSITY_SLUG;
 
 export const tags = {
   home: "home",
@@ -26,19 +24,22 @@ export const tags = {
   course: (slug: string) => `course:${slug}`,
 };
 
-export const getUniversity = () =>
-  apiFetchOrNull<UniversityDetail>(`/universities/${U}`, { tags: [tags.home] });
+export const getUniversities = () =>
+  apiFetch<UniversityListItem[]>("/universities", { tags: [tags.home], revalidate: 3600 });
 
-export const getCourse = (course: string) =>
-  apiFetchOrNull<CourseDetail>(`/courses/${U}/${course}`, { tags: [tags.course(course)] });
+export const getUniversity = (u: string) =>
+  apiFetchOrNull<UniversityDetail>(`/universities/${u}`, { tags: [tags.home] });
 
-export const getTerm = (course: string, term: string) =>
-  apiFetchOrNull<TermDetail>(`/terms/${U}/${course}/${term}`, {
+export const getCourse = (u: string, course: string) =>
+  apiFetchOrNull<CourseDetail>(`/courses/${u}/${course}`, { tags: [tags.course(course)] });
+
+export const getTerm = (u: string, course: string, term: string) =>
+  apiFetchOrNull<TermDetail>(`/terms/${u}/${course}/${term}`, {
     tags: [tags.term(`${course}/${term}`), tags.course(course)],
   });
 
-export const getSubject = (course: string, term: string, subject: string) =>
-  apiFetchOrNull<SubjectDetail>(`/subjects/${U}/${course}/${term}/${subject}`, {
+export const getSubject = (u: string, course: string, term: string, subject: string) =>
+  apiFetchOrNull<SubjectDetail>(`/subjects/${u}/${course}/${term}/${subject}`, {
     tags: [tags.subject(`${course}/${term}/${subject}`), tags.term(`${course}/${term}`)],
   });
 

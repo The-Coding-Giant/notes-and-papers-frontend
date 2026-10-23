@@ -4,7 +4,7 @@
 Primary KPI: every paper/subject/course page is indexable and ranks ("BCA 1st year question papers Rajasthan University").
 
 ## Frontend scope
-- Routes (spec section 9): `/`, `/rajasthan-university[/{course}[/{term}[/{subject}]]]`, `/papers/{slug}`,
+- Routes (spec section 9): `/`, `/universities[/{university}[/{course}[/{term}[/{subject}]]]]`, `/papers/{slug}`,
   `/notes[/{slug}]`, `/search`, `/login /signup /forgot-password /account /bookmarks /downloads /upload`,
   `/about /contact /privacy /terms /takedown`, `/admin/**`, `/sitemap.xml`, `/sitemaps/{type}/{n}.xml`, `/robots.txt`.
 - ISR: `fetch(..., { next: { revalidate: 86400, tags } })`. Tags: `paper:{slug}`, `subject:{id}`, `term:{id}`,

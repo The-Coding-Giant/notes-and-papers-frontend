@@ -1,39 +1,58 @@
-import { plural } from "@/lib/utils";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { EmptyState } from "@/components/shared/empty-state";
 import { JsonLdScript } from "@/components/shared/json-ld";
 import { Card } from "@/components/ui/card";
-import { getUniversity } from "@/lib/api/public";
-import { UNIVERSITY_NAME } from "@/lib/env";
+import { getUniversities, getUniversity } from "@/lib/api/public";
 import { routes } from "@/lib/routes";
 import { buildMetadata, collectionPageLd, itemListLd } from "@/lib/seo";
-import { notFound } from "next/navigation";
+import { plural } from "@/lib/utils";
 
 // Shorter than other pages: if the API was down during a build, the degraded page heals within the hour.
 export const revalidate = 3600;
+export const dynamicParams = true;
 
-async function load() {
+export async function generateStaticParams() {
   try {
-    return { u: await getUniversity(), failed: false };
+    return (await getUniversities()).map((u) => ({ university: u.slug }));
+  } catch {
+    return []; // API unreachable at build time: fall back to on-demand ISR
+  }
+}
+
+async function load(slug: string) {
+  try {
+    return { u: await getUniversity(slug), failed: false };
   } catch {
     return { u: null, failed: true };
   }
 }
 
-export async function generateMetadata() {
-  const { u, failed } = await load();
+export async function generateMetadata(props: PageProps<"/universities/[university]">) {
+  const slug = (await props.params).university;
+  const { u, failed } = await load(slug);
+  if (!u && !failed) return { title: "University not found", robots: { index: false } };
+  const name = u?.name ?? "University";
   return buildMetadata({
-    title: `${UNIVERSITY_NAME} (UNIRAJ) Question Papers - All Courses`,
-    description: `Previous year question papers for every ${UNIVERSITY_NAME} course: BA, BSc, BCom, BCA and more. Free PDFs, subject-wise.`,
-    path: routes.university,
+    title: `${name} Question Papers - All Courses`,
+    description: `Previous year question papers for every ${name} course${
+      u
+        ? `: ${u.courses
+            .slice(0, 5)
+            .map((c) => c.name)
+            .join(", ")} and more`
+        : ""
+    }. Free PDFs, subject-wise.`,
+    path: routes.university(slug),
     noindex: failed || !u || u.courses.length === 0,
   });
 }
 
-export default async function UniversityPage() {
-  const { u, failed } = await load();
-  const path = routes.university;
+export default async function UniversityPage(props: PageProps<"/universities/[university]">) {
+  const slug = (await props.params).university;
+  const { u, failed } = await load(slug);
+  const path = routes.university(slug);
   if (failed) {
     return (
       <EmptyState
@@ -50,14 +69,15 @@ export default async function UniversityPage() {
       <Breadcrumbs
         items={[
           { name: "Home", path: "/" },
-          { name: UNIVERSITY_NAME, path },
+          { name: "Universities", path: routes.universities },
+          { name: u.name, path },
         ]}
       />
       <header className="space-y-4">
-        <h1 className="text-5xl sm:text-6xl">{UNIVERSITY_NAME} Question Papers</h1>
+        <h1 className="text-5xl sm:text-6xl">{u.name} Question Papers</h1>
         <p className="max-w-3xl text-muted-foreground">
           {u.description ??
-            `Browse ${u.paper_count} previous year question papers across ${u.courses.length} courses of ${UNIVERSITY_NAME}. Pick your course, then your part or semester, then your subject.`}
+            `Browse ${u.paper_count} previous year question papers across ${u.courses.length} courses of ${u.name}. Pick your course, then your part or semester, then your subject.`}
         </p>
       </header>
 
@@ -71,7 +91,7 @@ export default async function UniversityPage() {
           {u.courses.map((c) => (
             <li key={c.slug}>
               <Card className="h-full transition-transform hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard">
-                <Link href={routes.course(c.slug)} className="block space-y-1 p-5">
+                <Link href={routes.course(slug, c.slug)} className="block space-y-1 p-5">
                   <h2 className="text-2xl">{c.name}</h2>
                   <p className="text-sm text-muted-foreground">
                     {c.level ?? "Course"} · {plural(c.paper_count, "paper")}
@@ -85,8 +105,8 @@ export default async function UniversityPage() {
 
       <JsonLdScript
         data={[
-          collectionPageLd(`${UNIVERSITY_NAME} Question Papers`, path, "All courses"),
-          itemListLd(u.courses.map((c) => ({ name: c.name, path: routes.course(c.slug) }))),
+          collectionPageLd(`${u.name} Question Papers`, path, "All courses"),
+          itemListLd(u.courses.map((c) => ({ name: c.name, path: routes.course(slug, c.slug) }))),
         ]}
       />
     </div>
