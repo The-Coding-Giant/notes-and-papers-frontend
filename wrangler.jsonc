@@ -24,6 +24,8 @@
 		{ "binding": "NEXT_TAG_CACHE_KV", "id": "d642f541c5dc4c8a9c8ea3f1747bb1de" },
 		{ "binding": "NEXT_INC_CACHE_KV", "id": "d642f541c5dc4c8a9c8ea3f1747bb1de" }
 	],
+	// Variables and secrets set in the Cloudflare dashboard (INDEXNOW_KEY, REVALIDATE_SECRET) survive every deploy.
+	"keep_vars": true,
 	"observability": {
 		"enabled": true
 	}
