@@ -1,5 +1,6 @@
 /** IndexNow ownership proof. The backend sends keyLocation = {site}/indexnow-key.txt (see backend services/revalidate.py). */
-export const dynamic = "force-static";
+// Read at request time: the key is a Cloudflare variable, not part of the build.
+export const dynamic = "force-dynamic";
 
 export function GET() {
   const key = process.env.INDEXNOW_KEY;
