@@ -4,7 +4,7 @@ import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import { EmptyState } from "@/components/shared/empty-state";
 import { JsonLdScript } from "@/components/shared/json-ld";
 import { Card } from "@/components/ui/card";
-import { getCourse, getTerm, getUniversities, getUniversity } from "@/lib/api/public";
+import { getTerm } from "@/lib/api/public";
 import { routes, yearRange } from "@/lib/routes";
 import { buildMetadata, collectionPageLd, itemListLd, termMeta } from "@/lib/seo";
 import { plural } from "@/lib/utils";
@@ -12,20 +12,10 @@ import { plural } from "@/lib/utils";
 export const revalidate = 86400;
 export const dynamicParams = true;
 
-export async function generateStaticParams() {
-  try {
-    const unis = await Promise.all((await getUniversities()).map((x) => getUniversity(x.slug)));
-    const out: { university: string; course: string; term: string }[] = [];
-    for (const u of unis) {
-      const courses = await Promise.all((u?.courses ?? []).map((c) => getCourse(u!.slug, c.slug)));
-      for (const c of courses)
-        for (const t of c?.terms ?? [])
-          out.push({ university: u!.slug, course: c!.slug, term: t.slug });
-    }
-    return out;
-  } catch {
-    return [];
-  }
+// Nothing is built in advance: Cloudflare's free KV allows about 1,000 cache writes a day and every deploy would spend
+// hundreds of them on pre-built pages. These pages are built on their first visit and then cached (see `revalidate`).
+export function generateStaticParams() {
+  return [];
 }
 
 export async function generateMetadata(
